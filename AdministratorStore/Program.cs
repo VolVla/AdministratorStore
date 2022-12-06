@@ -7,21 +7,20 @@ namespace AdministratorStore
     {
         static void Main()
         {
-            Queue<Client> Clients = new Queue<Client>();
-            Shop Shop = new Shop();
-            bool IsWork = true;
-            ConsoleKey ExitButton = ConsoleKey.Enter;
+            Shop shop = new Shop();
+            bool isWork = true;
+            ConsoleKey exitButton = ConsoleKey.Enter;
 
-            while (IsWork)
+            while (isWork)
             {
-                Shop.CreateClient(Clients);
-                Shop.ServiceClient(Clients);
+                shop.CreateClients();
+                shop.ServiceClients();
                 Console.WriteLine("Вы обслужили всех клиентов");
                 Console.WriteLine($"Вы хотите выйти из программы?Нажмите Enter.\nДля продолжение работы нажмите любую другую клавишу");
 
-                if (Console.ReadKey().Key == ExitButton)
+                if (Console.ReadKey().Key == exitButton)
                 {
-                    IsWork = false;
+                    isWork = false;
                     Console.WriteLine("Вы вышли из программы");
                 }
 
@@ -32,76 +31,80 @@ namespace AdministratorStore
 
     class Shop
     {
-        private int _numberClients;
-        private Random _money = new Random();
-        private Cashier _cashier = new Cashier();
+        private List<Product> _products;
+        private Queue<Client> _clients = new Queue<Client>();
+        private Random _random = new Random();
+        private int _moneyShop = 0;
 
-        public void CreateClient(Queue<Client> Clients)
+        public Shop()
         {
+            _products = new List<Product>();
+            _products.Add(new Product("Печенье", 20));
+            _products.Add(new Product("Картошка", 10));
+            _products.Add(new Product("Морковка", 15));
+            _products.Add(new Product("Хлеб", 12));
+            _products.Add(new Product("Молоко", 14));
+            _products.Add(new Product("Водка", 16));
+            _products.Add(new Product("Балалайка", 16));
+            _products.Add(new Product("Часы", 20));
+            _products.Add(new Product("Шкаф", 14));
+            _products.Add(new Product("Велосипед", 12));
+        }
+
+        public void CreateClients()
+        {
+            int numberProduct;
+            Random random = new Random();
             Console.WriteLine("Введите количество клиентов в магазине");
-            int.TryParse(Console.ReadLine(), out int NumberClients);
+            int.TryParse(Console.ReadLine(), out int numberClients);
 
-            for (int i = 0; i < NumberClients; i++)
+            for (int i = 0; i < numberClients; i++)
             {
-                Client Client = new Client(_money);
-                Clients.Enqueue(Client);
+                Client client = new Client(_random);
+                numberProduct = random.Next(0, _products.Count + 1);
+
+                for (int x = 0; x < numberProduct; x++)
+                {
+                    client.AddProduct(_products);
+                }
+
+                _clients.Enqueue(client);
             }
         }
 
-        public void ServiceClient(Queue<Client> Clients)
+        public void ServiceClients()
         {
-            _numberClients = Clients.Count;
-            _cashier.SellProduct(Clients, _numberClients);
-        }
-    }
+            int numberClients = _clients.Count;
 
-    class Cashier
-    {
-        private Random _product = new Random();
-
-        public void SellProduct(Queue<Client> Clients, int NumberClients)
-        {
-            for (int i = 0; i < NumberClients; i++)
+            for (int i = 0; i < numberClients; i++)
             {
-                Client Client = Clients.Dequeue();
-                AmountSellProduct(Client.ReturnBacket(), Client.Money);
+                Client client = _clients.Dequeue();
+                ServiceClient(client);
             }
         }
 
-        public void AmountSellProduct(List<Product> Backet, int Money)
+        public void ServiceClient(Client client)
         {
-            bool IsBuy = true;
-            int AmountCostProducts;
-            int IndexRandomRemoveProduct;
-            AmountCostProducts = AmountSellPrice(Backet);
+            bool isBuy = true;
+            int amountCostProducts = client.AmountSellPrice();
 
-            while (IsBuy == true)
+            while (isBuy == true)
             {
-                if (Money >= AmountCostProducts)
+                if (client.Money >= amountCostProducts)
                 {
                     Console.WriteLine("Клиент оплатил покупки и ушел.");
-                    IsBuy = false;
+                    isBuy = false;
                 }
                 else
                 {
-                    IndexRandomRemoveProduct = _product.Next(0, Backet.Count);
-                    AmountCostProducts -= Backet[IndexRandomRemoveProduct].SellPrice;
-                    Backet.Remove(Backet[IndexRandomRemoveProduct]);
+                    amountCostProducts = client.AmountCost(amountCostProducts);
+                    client.RemoveProduct();
                     Console.WriteLine($"Клиент вытащил и убрал случайный товар");
                 }
             }
-        }
 
-        public int AmountSellPrice(List<Product> Basket)
-        {
-            int AmountMoney = 0;
-
-            for (int i = 0; i < Basket.Count; i++)
-            {
-                AmountMoney += Basket[i].SellPrice;
-            }
-
-            return AmountMoney;
+            _moneyShop += amountCostProducts;
+            Console.WriteLine($"На {amountCostProducts} монет продал продукции магазин\nИтоговая прибыль {_moneyShop}");
         }
     }
 
@@ -109,29 +112,55 @@ namespace AdministratorStore
     {
         private int _minumumMoney = 30;
         private int _maximumMoney = 50;
-        private List<Product> _basket = new List<Product>() { new Product("Картошка", 10), new Product("Морковка", 15), new Product("Хлеб", 12), new Product("Молоко", 14), new Product("Шоколадка", 16) };
+        private int _indexRandomRemoveProduct;
+        private Random _product = new Random();
+        private List<Product> _basket = new List<Product>();
 
         public int Money { get; private set; }
 
-        public Client(Random _random)
+        public Client(Random random)
         {
-            Money = _random.Next(_minumumMoney, _maximumMoney);
+            Money = random.Next(_minumumMoney, _maximumMoney);
         }
 
-        public List<Product> ReturnBacket()
+        public int AmountCost(int amountCost)
         {
-            return _basket;
+            _indexRandomRemoveProduct = _product.Next(0, _basket.Count);
+            amountCost -= _basket[_indexRandomRemoveProduct].SellPrice;
+            return amountCost;
+        }
+
+        public void RemoveProduct()
+        {
+            _basket.Remove(_basket[_indexRandomRemoveProduct]);
+        }
+
+        public int AmountSellPrice()
+        {
+            int amountMoney = 0;
+
+            for (int i = 0; i < _basket.Count; i++)
+            {
+                amountMoney += _basket[i].SellPrice;
+            }
+
+            return amountMoney;
+        }
+
+        public void AddProduct(List<Product> backet)
+        {
+            _basket.Add(backet[_product.Next(0, backet.Count)]);
         }
     }
 
     class Product
     {
-        public string NameProduct { get; private set; }
+        public string Name { get; private set; }
         public int SellPrice { get; private set; }
 
         public Product(string nameProduct, int sellPrice)
         {
-            NameProduct = nameProduct;
+            Name = nameProduct;
             SellPrice = sellPrice;
         }
     }
