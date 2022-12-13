@@ -83,7 +83,7 @@ namespace AdministratorStore
             }
         }
 
-        public void ServiceClient(Client client)
+        private void ServiceClient(Client client)
         {
             bool isBuy = true;
             int amountCostProducts = client.AmountSellPrice();
@@ -97,8 +97,8 @@ namespace AdministratorStore
                 }
                 else
                 {
-                    amountCostProducts = client.AmountCost(amountCostProducts);
                     client.RemoveProduct();
+                    amountCostProducts = client.AmountSellPrice();
                     Console.WriteLine($"Клиент вытащил и убрал случайный товар");
                 }
             }
@@ -123,15 +123,9 @@ namespace AdministratorStore
             Money = random.Next(_minumumMoney, _maximumMoney);
         }
 
-        public int AmountCost(int amountCost)
-        {
-            _indexRandomRemoveProduct = _product.Next(0, _basket.Count);
-            amountCost -= _basket[_indexRandomRemoveProduct].SellPrice;
-            return amountCost;
-        }
-
         public void RemoveProduct()
         {
+            _indexRandomRemoveProduct = _product.Next(0, _basket.Count);
             _basket.Remove(_basket[_indexRandomRemoveProduct]);
         }
 
