@@ -75,11 +75,14 @@ namespace AdministratorStore
         public void ServiceClients()
         {
             int numberClients = _clients.Count;
+            int numberClient = 0;
 
-            for (int i = 0; i < numberClients; i++)
+            while (numberClients > numberClient)
             {
                 Client client = _clients.Dequeue();
                 ServiceClient(client);
+                Console.WriteLine("Вы обслужили клиента");
+                numberClient++;
             }
         }
 
