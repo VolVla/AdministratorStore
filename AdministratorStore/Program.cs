@@ -88,7 +88,7 @@ namespace AdministratorStore
         {
             int numberClients = _clients.Count;
 
-            while (numberClients > 0)
+            for (int i = 0; i < numberClients; i++)
             {
                 Client client = _clients.Dequeue();
                 ServiceClient(client);
@@ -143,7 +143,7 @@ namespace AdministratorStore
 
         public void GetRandomProductBacket(List<Product> backet)
         {
-            _basket.Add(backet[Randoms.GetRandomNumber(0, _basket.Count)]);
+            _basket.Add(backet[Randoms.GetRandomNumber(0, backet.Count)]);
         }
 
         public int SellAmountlPrice()
