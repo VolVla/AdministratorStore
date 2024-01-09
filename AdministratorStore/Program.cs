@@ -29,14 +29,13 @@ namespace AdministratorStore
         }
     }
 
-    static class Randoms
+    static class Utility
     {
-        private static Random _random = new Random();
+        private static Random s_random = new Random();
 
         static public int GetRandomNumber(int minum, int maximum)
         {
-            int number = _random.Next(minum, maximum);
-            return number;
+            return s_random.Next(minum, maximum);
         }
     }
 
@@ -65,7 +64,7 @@ namespace AdministratorStore
 
         public void CreateClients()
         {
-            int numberProduct;
+            int amountProducts;
 
             Console.WriteLine("Введите количество клиентов в магазине");
             int.TryParse(Console.ReadLine(), out int numberClients);
@@ -73,11 +72,11 @@ namespace AdministratorStore
             for (int i = 0; i < numberClients; i++)
             {
                 Client client = new Client();
-                numberProduct = Randoms.GetRandomNumber(0, _products.Count + 1);
+                amountProducts = Utility.GetRandomNumber(0, _products.Count + 1);
 
-                for (int x = 0; x < numberProduct; x++)
+                for (int x = 0; x < amountProducts; x++)
                 {
-                    client.GetRandomProductBacket(_products);
+                    client.AddRandomProductBacket(_products);
                 }
 
                 _clients.Enqueue(client);
@@ -87,35 +86,29 @@ namespace AdministratorStore
         public void ServiceClients()
         {
             int numberClients = _clients.Count;
+            int valueServiceClientQueue = 0;
 
-            for (int i = 0; i < numberClients; i++)
+            while (numberClients > valueServiceClientQueue)
             {
                 Client client = _clients.Dequeue();
                 ServiceClient(client);
                 Console.WriteLine("Вы обслужили клиента");
+                valueServiceClientQueue++;
             }
         }
 
         private void ServiceClient(Client client)
         {
-            bool isBuy = true;
-            int amountCostProducts = client.SellAmountlPrice();
+            int amountCostProducts = client.GetAmountPrice();
 
-            while (isBuy == true)
+            while (client.Money >= amountCostProducts)
             {
-                if (client.Money >= amountCostProducts)
-                {
-                    Console.WriteLine("Клиент оплатил покупки и ушел.");
-                    isBuy = false;
-                }
-                else
-                {
-                    client.RemoveProduct();
-                    amountCostProducts = client.SellAmountlPrice();
-                    Console.WriteLine($"Клиент вытащил и убрал случайный товар");
-                }
+                client.RemoveProduct();
+                amountCostProducts = client.GetAmountPrice();
+                Console.WriteLine($"Клиент вытащил и убрал случайный товар");
             }
 
+            Console.WriteLine("Клиент оплатил покупки и ушел.");
             _money += amountCostProducts;
             Console.WriteLine($"На {amountCostProducts} монет продал продукции магазин\nИтоговая прибыль {_money}");
         }
@@ -137,16 +130,16 @@ namespace AdministratorStore
 
         public void RemoveProduct()
         {
-            _indexRandomRemoveProduct = Randoms.GetRandomNumber(0, _basket.Count);
+            _indexRandomRemoveProduct = Utility.GetRandomNumber(0, _basket.Count);
             _basket.Remove(_basket[_indexRandomRemoveProduct]);
         }
 
-        public void GetRandomProductBacket(List<Product> backet)
+        public void AddRandomProductBacket(List<Product> backet)
         {
-            _basket.Add(backet[Randoms.GetRandomNumber(0, backet.Count)]);
+            _basket.Add(backet[Utility.GetRandomNumber(0, backet.Count)]);
         }
 
-        public int SellAmountlPrice()
+        public int GetAmountPrice()
         {
             int amountMoney = 0;
 
@@ -160,7 +153,7 @@ namespace AdministratorStore
 
         private void SetMoney()
         {
-            Money = Randoms.GetRandomNumber(_minumumMoney, _maximumMoney);
+            Money = Utility.GetRandomNumber(_minumumMoney, _maximumMoney);
         }
     }
 
