@@ -16,7 +16,7 @@ namespace AdministratorStore
                 shop.CreateClients();
                 shop.ServiceClients();
                 Console.WriteLine("Вы обслужили всех клиентов");
-                Console.WriteLine($"Вы хотите выйти из программы?Нажмите Enter.\nДля продолжение работы нажмите любую другую клавишу");
+                Console.WriteLine($"Вы хотите выйти из программы?Нажмите {exitButton}.\nДля продолжение работы нажмите любую другую клавишу");
 
                 if (Console.ReadKey().Key == exitButton)
                 {
@@ -123,7 +123,7 @@ namespace AdministratorStore
 
         public Client()
         {
-            SetMoney();
+            Money = Utility.GetRandomNumber(_minumumMoney, _maximumMoney);
         }
 
         public int Money { get; private set; }
@@ -149,11 +149,6 @@ namespace AdministratorStore
             }
 
             return amountMoney;
-        }
-
-        private void SetMoney()
-        {
-            Money = Utility.GetRandomNumber(_minumumMoney, _maximumMoney);
         }
     }
 
