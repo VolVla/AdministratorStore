@@ -29,11 +29,21 @@ namespace AdministratorStore
         }
     }
 
+    static class Randoms
+    {
+        private static Random _random = new Random();
+
+        static public int GetRandomNumber(int minum, int maximum)
+        {
+            int number = _random.Next(minum, maximum);
+            return number;
+        }
+    }
+
     class Shop
     {
         private List<Product> _products;
         private Queue<Client> _clients = new Queue<Client>();
-        static private Random _random = new Random();
         private int _money = 0;
 
         public Shop()
@@ -62,8 +72,8 @@ namespace AdministratorStore
 
             for (int i = 0; i < numberClients; i++)
             {
-                Client client = new Client(_random);
-                numberProduct = _random.Next(0, _products.Count + 1);
+                Client client = new Client();
+                numberProduct = Randoms.GetRandomNumber(0, _products.Count + 1);
 
                 for (int x = 0; x < numberProduct; x++)
                 {
@@ -77,14 +87,12 @@ namespace AdministratorStore
         public void ServiceClients()
         {
             int numberClients = _clients.Count;
-            int numberClient = 0;
 
-            while (numberClients > numberClient)
+            while (numberClients > 0)
             {
                 Client client = _clients.Dequeue();
                 ServiceClient(client);
                 Console.WriteLine("Вы обслужили клиента");
-                numberClient++;
             }
         }
 
@@ -117,21 +125,25 @@ namespace AdministratorStore
     {
         private int _minumumMoney = 30;
         private int _maximumMoney = 50;
-        private int _indexRandomRemoveProduct;
-        private Random _random = new Random();
         private List<Product> _basket = new List<Product>();
+        private int _indexRandomRemoveProduct;
 
-        public Client(Random random)
+        public Client()
         {
-            SetMoney(random);
+            SetMoney();
         }
 
         public int Money { get; private set; }
 
         public void RemoveProduct()
         {
-            _indexRandomRemoveProduct = _random.Next(0, _basket.Count);
+            _indexRandomRemoveProduct = Randoms.GetRandomNumber(0, _basket.Count);
             _basket.Remove(_basket[_indexRandomRemoveProduct]);
+        }
+
+        public void GetRandomProductBacket(List<Product> backet)
+        {
+            _basket.Add(backet[Randoms.GetRandomNumber(0, _basket.Count)]);
         }
 
         public int SellAmountlPrice()
@@ -146,14 +158,9 @@ namespace AdministratorStore
             return amountMoney;
         }
 
-        public void GetRandomProductBacket(List<Product> backet)
+        private void SetMoney()
         {
-            _basket.Add(backet[_random.Next(0, backet.Count)]);
-        }
-
-        private void SetMoney(Random random)
-        {
-            Money = random.Next(_minumumMoney, _maximumMoney);
+            Money = Randoms.GetRandomNumber(_minumumMoney, _maximumMoney);
         }
     }
 
